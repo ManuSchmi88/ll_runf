@@ -77,8 +77,14 @@ fr  = FlowRouter(mg)
 ld  = LinearDiffuser(mg,linear_diffusivity=ldi)
 fc  = FastscapeEroder(mg,K_sp = Ksp1,m_sp=msp, n_sp=nsp, threshold_sp=threshold_arr)
 
-#Main Loop 1 (After first sucess is confirmed this is all moved in a class....)
-t0 = time.time()
+##------------------------------------------------##
+##-------START OF THE SECOND LOOP-----------------##
+##------------------------------------------------##
+##(After first sucess is confirmed this is all moved in a class....)
+
+t0 = time.time() #start system timer
+
+#start loop
 while elapsed_time < total_T1:
 
     #Erosional routines:
@@ -88,6 +94,8 @@ while elapsed_time < total_T1:
     
     #Add uplift
     mg.at_node['topographic__elevation'][mg.core_nodes] += uplift_rate * dt #add uplift
+
+    #Output every oi - years
     if elapsed_time % oi  == 0:
         print('Elapsed Time:' , elapsed_time,'writing output!')
         #Create DEM
@@ -111,7 +119,7 @@ while elapsed_time < total_T1:
         plt.savefig('./SA/SA_t{}'.format(elapsed_time)+'__'+str(int(elapsed_time/oi)).zfill(zp)+'.png')
         plt.close()
         #Create NetCDF Output
-        write_netcdf('./NC/output{}'.format(elapsed_time)+'__'+str(int(elapsed_time/oi)).zfill(zp)+'.nc',
+        write_netcdf('./NC/output_t{}'.format(elapsed_time)+'__'+str(int(elapsed_time/oi)).zfill(zp)+'.nc',
                 mg,format='NETCDF4')
     elapsed_time += dt #update elapsed time
 tE = time.time()
@@ -119,8 +127,8 @@ print()
 print('End of  Main Loop. So far it took {}s to get here. No worries homeboy...'.format(tE-t0))
 
 ##------------------------------------------------##
-####-------------------------------------------------------------------------##
 ##-------START OF THE SECOND LOOP-----------------##
+##------------------------------------------------##
 
 while elapsed_time < total_T2:
     
@@ -132,16 +140,16 @@ while elapsed_time < total_T2:
     #Add uplift
     mg.at_node['topographic__elevation'][mg.core_nodes] += uplift_rate * dt #add uplift
 
-    #Output every 100 years
+    #Output every oi - years
     if elapsed_time % oi == 0:
         print('Elapsed Time:' , elapsed_time,'writing output!')
         plt.figure()
         imshow_grid(mg,'topographic__elevation',grid_units=['km','km'],var_name = 'Elevation',cmap='terrain')
-        plt.savefig('./DEM/Testrun_DEM2_t{}'.format(elapsed_time)+'__'+str(int(elapsed_time/out_int)).zfill(zp)+'.png')
+        plt.savefig('./DEM/DEM*_t{}'.format(elapsed_time)+'__'+str(int(elapsed_time/out_int)).zfill(zp)+'.png')
         plt.close()
         plt.figure()
         imshow_grid(mg,fr.drainage_area,cmap='bone')
-        plt.savefig('./ACC/Testrun_ACC2_t{}.png'.format(elapsed_time))
+        plt.savefig('./ACC/ACC*_t{}.png'.format(elapsed_time))
         plt.close()
         plt.figure()
         plt.loglog(mg.at_node['drainage_area'][np.where(mg.at_node['drainage_area'] > 0)],
@@ -150,9 +158,9 @@ while elapsed_time < total_T2:
         plt.ylim([0.1,1])
         plt.xlabel('Area')
         plt.ylabel('Slope')
-        plt.savefig('./SA/Testrun_SA2_t{}.png'.format(elapsed_time))
+        plt.savefig('./SA/SA*_t{}.png'.format(elapsed_time))
         plt.close()
-        write_netcdf('./NC/output2{}'.format(elapsed_time)+'__'+str(int(elapsed_time/out_int)).zfill(zp)+'.nc'
+        write_netcdf('./NC/output*_t{}'.format(elapsed_time)+'__'+str(int(elapsed_time/out_int)).zfill(zp)+'.nc'
                      ,mg,format='NETCDF4')
     
     #update elapsed time
