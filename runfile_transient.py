@@ -80,11 +80,14 @@ fc  = FastscapeEroder(mg,K_sp = Ksp1,m_sp=msp, n_sp=nsp, threshold_sp=threshold_
 #Main Loop 1 (After first sucess is confirmed this is all moved in a class....)
 t0 = time.time()
 while elapsed_time < total_T1:
-    #mg.at_node['topographic__slope']  = mg.calc_slope_at_node(z) #Calculate slope for the detachment-eroder
+
+    #Erosional routines:
     fr.route_flow()
     ld.run_one_step(dt=dt)
     fc.run_one_step(dt=dt)
-    z[mg.core_nodes] += uplift_rate * dt #add uplift
+    
+    #Add uplift
+    mg.at_node['topographic__elevation'][mg.core_nodes] += uplift_rate * dt #add uplift
     if elapsed_time % oi  == 0:
         print('Elapsed Time:' , elapsed_time,'writing output!')
         #Create DEM
@@ -115,3 +118,46 @@ tE = time.time()
 print()
 print('End of  Main Loop. So far it took {}s to get here. No worries homeboy...'.format(tE-t0))
 
+##------------------------------------------------##
+####-------------------------------------------------------------------------##
+##-------START OF THE SECOND LOOP-----------------##
+
+while elapsed_time < total_T2:
+    
+    #Actual erosion routines:
+    fr.run_one_step(dt=dt)
+    ld2.run_one_step(dt=dt)
+    fc2.run_one_step(dt=dt)
+    
+    #Add uplift
+    mg.at_node['topographic__elevation'][mg.core_nodes] += uplift_rate * dt #add uplift
+
+    #Output every 100 years
+    if elapsed_time % oi == 0:
+        print('Elapsed Time:' , elapsed_time,'writing output!')
+        plt.figure()
+        imshow_grid(mg,'topographic__elevation',grid_units=['km','km'],var_name = 'Elevation',cmap='terrain')
+        plt.savefig('./DEM/Testrun_DEM2_t{}'.format(elapsed_time)+'__'+str(int(elapsed_time/out_int)).zfill(zp)+'.png')
+        plt.close()
+        plt.figure()
+        imshow_grid(mg,fr.drainage_area,cmap='bone')
+        plt.savefig('./ACC/Testrun_ACC2_t{}.png'.format(elapsed_time))
+        plt.close()
+        plt.figure()
+        plt.loglog(mg.at_node['drainage_area'][np.where(mg.at_node['drainage_area'] > 0)],
+           mg.at_node['topographic__slope'][np.where(mg.at_node['drainage_area'] > 0)],
+           marker='.',linestyle='None')
+        plt.ylim([0.1,1])
+        plt.xlabel('Area')
+        plt.ylabel('Slope')
+        plt.savefig('./SA/Testrun_SA2_t{}.png'.format(elapsed_time))
+        plt.close()
+        write_netcdf('./NC/output2{}'.format(elapsed_time)+'__'+str(int(elapsed_time/out_int)).zfill(zp)+'.nc'
+                     ,mg,format='NETCDF4')
+    
+    #update elapsed time
+    elapsed_time += dt
+tE = time.time()
+print()
+print('Second loop done!')
+print('We are finished will all loops. Can I go sleep now?')
