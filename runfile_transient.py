@@ -78,6 +78,9 @@ plt.savefig('Distribution of SP_Threshold',dpi=720)
 fr  = FlowRouter(mg)
 ld  = LinearDiffuser(mg,linear_diffusivity=ldi)
 fc  = FastscapeEroder(mg,K_sp = Ksp1,m_sp=msp, n_sp=nsp, threshold_sp=threshold_arr)
+ld2 = LinearDiffuser(mg,linear_diffusivity=linear_diffusivity_base2)
+fc2 = FastscapeEroder(mg,K_sp = Ksp2,m_sp=msp, n_sp=nsp, threshold_sp=threshold_arr)
+
 
 ##------------------------------------------------##
 ##-------START OF THE SECOND LOOP-----------------##
@@ -86,7 +89,6 @@ fc  = FastscapeEroder(mg,K_sp = Ksp1,m_sp=msp, n_sp=nsp, threshold_sp=threshold_
 
 t0 = time.time() #start system timer
 
-#start loop
 while elapsed_time < total_T1:
 
     #Erosional routines:
@@ -123,10 +125,13 @@ while elapsed_time < total_T1:
         #Create NetCDF Output
         write_netcdf('./NC/output_t{}'.format(elapsed_time)+'__'+str(int(elapsed_time/oi)).zfill(zp)+'.nc',
                 mg,format='NETCDF4')
+
     elapsed_time += dt #update elapsed time
 tE = time.time()
 print()
-print('End of  Main Loop. So far it took {}s to get here. No worries homeboy...'.format(tE-t0))
+print('First loop done!')
+print('We now switch the to the second part with a lin_diff of {} and and K_sp of {}'.format(ldi2,Ksp2))
+print('So far it took {}s to run'.format(tE - t0))
 
 ##------------------------------------------------##
 ##-------START OF THE SECOND LOOP-----------------##
