@@ -23,7 +23,10 @@ import time
 
 ##TIME
 ##runtime
-total_T1 = 10e6  #yrs. 
+##Important to know: total_T2 is the TOTAL RUNTIME of the model
+##After total_T1 there is a change in parameters.
+total_T1 = 5e5  #50.000 yrs. 
+total_T2 = 3e6  #3.000.000 yrs
 ##timestep
 dt = 100        #yrs
 ##number of timesteps and fillfactor for ffmpeg printout
@@ -35,7 +38,6 @@ no = total_T1/oi
 zp = len(str(int(no)))
 ##uplift
 uplift_rate = 5e-4 #m/yr
-uplift_per_step = uplift_rate * dt
 
 ##eroder/diffuser
 Ksp1 = 1e-5
