@@ -78,7 +78,7 @@ plt.savefig('Distribution of SP_Threshold',dpi=720)
 fr  = FlowRouter(mg)
 ld  = LinearDiffuser(mg,linear_diffusivity=ldi)
 fc  = FastscapeEroder(mg,K_sp = Ksp1,m_sp=msp, n_sp=nsp, threshold_sp=threshold_arr)
-ld2 = LinearDiffuser(mg,linear_diffusivity=linear_diffusivity_base2)
+ld2 = LinearDiffuser(mg,linear_diffusivity=ldi2)
 fc2 = FastscapeEroder(mg,K_sp = Ksp2,m_sp=msp, n_sp=nsp, threshold_sp=threshold_arr)
 
 
