@@ -116,7 +116,7 @@ while elapsed_time < total_T1:
         #Create Slope - Area Map
         plt.figure()
         plt.loglog(mg.at_node['drainage_area'][np.where(mg.at_node['drainage_area'] > 0)],
-           mg.at_node['topographic__slope'][np.where(mg.at_node['drainage_area'] > 0)],
+           mg.at_node['topographic__steepest_slope'][np.where(mg.at_node['drainage_area'] > 0)],
            marker='.',linestyle='None')
         plt.xlabel('Area')
         plt.ylabel('Slope')
@@ -160,7 +160,7 @@ while elapsed_time < total_T2:
         plt.close()
         plt.figure()
         plt.loglog(mg.at_node['drainage_area'][np.where(mg.at_node['drainage_area'] > 0)],
-           mg.at_node['topographic__slope'][np.where(mg.at_node['drainage_area'] > 0)],
+           mg.at_node['topographic__steepest_slope'][np.where(mg.at_node['drainage_area'] > 0)],
            marker='.',linestyle='None')
         plt.ylim([0.1,1])
         plt.xlabel('Area')

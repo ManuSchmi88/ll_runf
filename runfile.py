@@ -71,11 +71,10 @@ fc  = FastscapeEroder(mg,K_sp = Ksp1,m_sp=msp, n_sp=nsp, threshold_sp=threshold_
 #Main Loop 1 (After first sucess is confirmed this is all moved in a class....)
 t0 = time.time()
 while elapsed_time < total_T1:
-    mg.at_node['topographic__slope']  = mg.calc_slope_at_node(z) #Calculate slope for the detachment-eroder
     fr.route_flow()
     ld.run_one_step(dt=dt)
     fc.run_one_step(dt=dt)
-    z[mg.core_nodes] += uplift_rate * dt #add uplift
+    mg.at_node['topographic__elevation'][mg.core_nodes] += uplift_rate * dt #add uplift
     if elapsed_time % oi  == 0:
         print('Elapsed Time:' , elapsed_time,'writing output!')
         #Create DEM
@@ -92,7 +91,7 @@ while elapsed_time < total_T1:
         #Create Slope - Area Map
         plt.figure()
         plt.loglog(mg.at_node['drainage_area'][np.where(mg.at_node['drainage_area'] > 0)],
-           mg.at_node['topographic__slope'][np.where(mg.at_node['drainage_area'] > 0)],
+           mg.at_node['topographic__steepest_slope'][np.where(mg.at_node['drainage_area'] > 0)],
            marker='.',linestyle='None')
         plt.xlabel('Area')
         plt.ylabel('Slope')
