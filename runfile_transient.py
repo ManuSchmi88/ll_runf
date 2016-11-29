@@ -152,11 +152,11 @@ while elapsed_time < total_T2:
         print('Elapsed Time:' , elapsed_time,'writing output!')
         plt.figure()
         imshow_grid(mg,'topographic__elevation',grid_units=['km','km'],var_name = 'Elevation',cmap='terrain')
-        plt.savefig('./DEM/DEM*_t{}'.format(elapsed_time)+'__'+str(int(elapsed_time/out_int)).zfill(zp)+'.png')
+        plt.savefig('./DEM/DEM*_t{}'.format(elapsed_time)+'__'+str(int(elapsed_time/oi)).zfill(zp)+'.png')
         plt.close()
         plt.figure()
         imshow_grid(mg,fr.drainage_area,cmap='bone')
-        plt.savefig('./ACC/ACC*_t{}.png'.format(elapsed_time))
+        plt.savefig('./ACC/ACC*_t{}'.format(elapsed_time)+'__'+str(int(elapsed_time/oi)).zfill(zp)+'.png')
         plt.close()
         plt.figure()
         plt.loglog(mg.at_node['drainage_area'][np.where(mg.at_node['drainage_area'] > 0)],
@@ -165,9 +165,9 @@ while elapsed_time < total_T2:
         plt.ylim([0.1,1])
         plt.xlabel('Area')
         plt.ylabel('Slope')
-        plt.savefig('./SA/SA*_t{}.png'.format(elapsed_time))
+        plt.savefig('./SA/SA*_t{}'.format(elapsed_time)+'__'+str(int(elapsed_time/oi)).zfill(zp)+'.png')
         plt.close()
-        write_netcdf('./NC/output*_t{}'.format(elapsed_time)+'__'+str(int(elapsed_time/out_int)).zfill(zp)+'.nc'
+        write_netcdf('./NC/output*_t{}'.format(elapsed_time)+'__'+str(int(elapsed_time/oi)).zfill(zp)+'.nc'
                      ,mg,format='NETCDF4')
     
     #update elapsed time
