@@ -41,7 +41,7 @@ uplift_rate = 5e-4 #m/yr
 
 ##eroder/diffuser
 Ksp1 = 1e-5
-Ksp2 = 1e-3
+Ksp2 = 5e-4 
 msp  = 0.5
 nsp  = 1.0
 ldi   = 1e-2
@@ -151,12 +151,12 @@ while elapsed_time < total_T2:
     if elapsed_time % oi == 0:
         print('Elapsed Time:' , elapsed_time,'writing output!')
         plt.figure()
-        imshow_grid(mg,'topographic__elevation',grid_units=['km','km'],var_name = 'Elevation',cmap='terrain')
-        plt.savefig('./DEM/DEM*_t{}'.format(elapsed_time)+'__'+str(int(elapsed_time/oi)).zfill(zp)+'.png')
+        imshow_grid(mg,'topographic__elevation',grid_units=['m','m'],var_name = 'Elevation',cmap='terrain')
+        plt.savefig('./DEM/DEM_t{}'.format(elapsed_time)+'__'+str(int(elapsed_time/oi)).zfill(zp)+'.png')
         plt.close()
         plt.figure()
         imshow_grid(mg,fr.drainage_area,cmap='bone')
-        plt.savefig('./ACC/ACC*_t{}'.format(elapsed_time)+'__'+str(int(elapsed_time/oi)).zfill(zp)+'.png')
+        plt.savefig('./ACC/ACC_t{}'.format(elapsed_time)+'__'+str(int(elapsed_time/oi)).zfill(zp)+'.png')
         plt.close()
         plt.figure()
         plt.loglog(mg.at_node['drainage_area'][np.where(mg.at_node['drainage_area'] > 0)],
@@ -165,9 +165,9 @@ while elapsed_time < total_T2:
         plt.ylim([0.1,1])
         plt.xlabel('Area')
         plt.ylabel('Slope')
-        plt.savefig('./SA/SA*_t{}'.format(elapsed_time)+'__'+str(int(elapsed_time/oi)).zfill(zp)+'.png')
+        plt.savefig('./SA/SA_t{}'.format(elapsed_time)+'__'+str(int(elapsed_time/oi)).zfill(zp)+'.png')
         plt.close()
-        write_netcdf('./NC/output*_t{}'.format(elapsed_time)+'__'+str(int(elapsed_time/oi)).zfill(zp)+'.nc'
+        write_netcdf('./NC/output_t{}'.format(elapsed_time)+'__'+str(int(elapsed_time/oi)).zfill(zp)+'.nc'
                      ,mg,format='NETCDF4')
     
     #update elapsed time
