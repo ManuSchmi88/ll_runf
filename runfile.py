@@ -101,7 +101,7 @@ while elapsed_time < total_T1:
     dhdt = dh/dt
     dhdtA.append(dhdt)
     meandhdt.append(np.mean(dhdt))
-    meanE.append(uplift_per_step - np.mean(dhdt))
+    meanE.append(np.mean(uplift_per_step - dhdt))
     
     #Run the output loop every oi-times
     if elapsed_time % oi  == 0:
