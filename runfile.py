@@ -28,6 +28,8 @@ total_T1 = 10e6  #yrs.
 dt = 100        #yrs
 #number of timesteps and fillfactor for ffmpeg printout
 nt = total_T1/dt
+#time-vector, mostly for plotting purposes
+timeVec = np.arange(0,total_T1,dt)
 #Set the interval at which we create output. Warning. High output frequency
 #will slow down the script significantly
 oi = 5000
@@ -95,7 +97,7 @@ while elapsed_time < total_T1:
     mg.at_node['topographic__elevation'][mg.core_nodes] += uplift_rate * dt #add uplift
     
     #Calculate dhdt and E
-    dh = (mg.at_node['topographic__elevtion'] - z0)
+    dh = (mg.at_node['topographic__elevation'] - z0)
     dhdt = dh/dt
     dhdtA.append(dhdt)
     meandhdt.append(np.mean(dhdt))
@@ -136,6 +138,13 @@ print('End of  Main Loop. So far it took {}s to get here. No worries homeboy...'
 ## TO KEEP RUNFILE NEAT AND SLEEK
 
 #E-t:
+plt.figure()
+plt.plot(timeVec,meanE)
+plt.ylabel('Erosion rate [m/yr]')
+plt.xlabel('Runtime [yrs]')
+plt.savefig('E-t-timeseries.png')
+
+#diffmap:
 counter = 0
 for i in dhdtA:
     if counter % oi == 0:
@@ -145,3 +154,4 @@ for i in dhdtA:
         print("Creating Diffmapfile {}.png".format(counter))
     counter += 1
 print("FINALLY! TADA! IT IS DONE! LOOK AT ALL THE OUTPUT I MADE!!!!")
+
