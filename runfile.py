@@ -14,12 +14,14 @@ import time
 
 #Build up Grid and define variables
 
-#DOMAIN
+#-----------DOMAIN---------------#
+
 ncols = 601 
 nrows = 601 
 dx    = 100
 
-#TIME
+#------------TIME----------------#
+
 #runtime
 total_T1 = 10e6  #yrs. 
 #timestep
@@ -31,11 +33,14 @@ nt = total_T1/dt
 oi = 5000
 no = total_T1/oi
 zp = len(str(int(no)))
-#uplift
+
+#------------UPLIFT--------------#
+
 uplift_rate = 5e-4 #m/yr
 uplift_per_step = uplift_rate * dt
 
-#eroder/diffuser
+#-------------EROSION------------#
+
 Ksp1 = 1e-5
 msp  = 0.5
 nsp  = 1.0
@@ -43,7 +48,15 @@ ldi   = 1e-2
 #time
 elapsed_time = 0
 
-#INITIALIZE LANDLAB COMPONENTGRId
+#---------VARIABLE INITIAION-----#
+
+dhdtA    = [] #Vector containing dhdt values for each node per timestep
+meandhdt = [] #contains mean elevation change per timestep
+meanE   = [] #contains the mean "erosion" rate out of Massbalance
+
+#-------------RUNTIME------------#
+
+#INITIALIZE LANDLAB COMPONENTGRID
 mg = RasterModelGrid((nrows,ncols),dx)
 z  = mg.add_ones('node','topographic__elevation')
 ir = np.random.rand(z.size)/1000 #builds up initial roughness
@@ -57,7 +70,7 @@ for edge in (mg.nodes_at_top_edge,mg.nodes_at_bottom_edge):
 
 #Create Threshold_sp field
 threshold_arr  = mg.zeros('node',dtype=float)
-threshold_arr += 0.
+threshold_arr += 3e-5
 threshold_field = mg.add_field('node','threshold_sp',threshold_arr,noclobber = False)
 imshow_grid(mg,'threshold_sp')
 plt.title('Stream-Power Threshold')
@@ -71,22 +84,36 @@ fc  = FastscapeEroder(mg,K_sp = Ksp1,m_sp=msp, n_sp=nsp, threshold_sp=threshold_
 #Main Loop 1 (After first sucess is confirmed this is all moved in a class....)
 t0 = time.time()
 while elapsed_time < total_T1:
+
+    #create copy of "old" topography
+    z0 = z.copy()
+    
+    #Call the erosion routines.
     fr.route_flow()
     ld.run_one_step(dt=dt)
     fc.run_one_step(dt=dt)
     mg.at_node['topographic__elevation'][mg.core_nodes] += uplift_rate * dt #add uplift
+    
+    #Calculate dhdt and E
+    dh = (mg.at_node['topographic__elevtion'] - z0)
+    dhdt = dh/dt
+    dhdtA.append(dhdt)
+    meandhdt.append(np.mean(dhdt))
+    meanE.append(uplift_per_step - np.mean(dhdt))
+    
+    #Run the output loop every oi-times
     if elapsed_time % oi  == 0:
         print('Elapsed Time:' , elapsed_time,'writing output!')
         #Create DEM
         plt.figure()
         imshow_grid(mg,'topographic__elevation',grid_units=['m','m'],var_name = 'Elevation',cmap='terrain')
-        plt.savefig('./DEM/DEM_t{}'.format(elapsed_time)+'__'+str(int(elapsed_time/oi)).zfill(zp)+'.png')
+        plt.savefig('./DEM/DEM_'+str(int(elapsed_time/oi)).zfill(zp)+'.png')
         plt.close()
         #Create Flow Accumulation Map
         plt.figure()
         imshow_grid(mg,fr.drainage_area,grid_units=['m','m'],var_name =
         'Drainage Area',cmap='bone')
-        plt.savefig('./ACC/ACC_t{}'.format(elapsed_time)+'__'+str(int(elapsed_time/oi)).zfill(zp)+'.png')
+        plt.savefig('./ACC/ACC_'+str(int(elapsed_time/oi)).zfill(zp)+'.png')
         plt.close()
         #Create Slope - Area Map
         plt.figure()
@@ -95,7 +122,7 @@ while elapsed_time < total_T1:
            marker='.',linestyle='None')
         plt.xlabel('Area')
         plt.ylabel('Slope')
-        plt.savefig('./SA/SA_t{}'.format(elapsed_time)+'__'+str(int(elapsed_time/oi)).zfill(zp)+'.png')
+        plt.savefig('./SA/SA_'+str(int(elapsed_time/oi)).zfill(zp)+'.png')
         plt.close()
         #Create NetCDF Output
         write_netcdf('./NC/output{}'.format(elapsed_time)+'__'+str(int(elapsed_time/oi)).zfill(zp)+'.nc',
