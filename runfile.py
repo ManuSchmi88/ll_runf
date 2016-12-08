@@ -52,7 +52,7 @@ elapsed_time = 0
 
 dhdtA    = [] #Vector containing dhdt values for each node per timestep
 meandhdt = [] #contains mean elevation change per timestep
-meanE   = [] #contains the mean "erosion" rate out of Massbalance
+meanE    = [] #contains the mean "erosion" rate out of Massbalance
 
 #-------------RUNTIME------------#
 
@@ -86,7 +86,7 @@ t0 = time.time()
 while elapsed_time < total_T1:
 
     #create copy of "old" topography
-    z0 = z.copy()
+    z0 = mg.at_node['topographic__elevation'].copy()
     
     #Call the erosion routines.
     fr.route_flow()
@@ -132,3 +132,16 @@ tE = time.time()
 print()
 print('End of  Main Loop. So far it took {}s to get here. No worries homeboy...'.format(tE-t0))
 
+## OUTPUT OF EROSION RATES AND DIFFMAPS (BETA! NEEDS TO GO INTO SEPERATE CLASS
+## TO KEEP RUNFILE NEAT AND SLEEK
+
+#E-t:
+counter = 0
+for i in dhdtA:
+    if counter % oi == 0:
+        imshow_grid(mg,i)
+        plt.savefig('./DHDT/diffmap_{}'.format(counter))
+        plt.close()
+        print("Creating Diffmapfile {}.png".format(counter))
+    counter += 1
+print("FINALLY! TADA! IT IS DONE! LOOK AT ALL THE OUTPUT I MADE!!!!")
