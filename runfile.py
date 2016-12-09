@@ -7,6 +7,7 @@ from landlab.components import LinearDiffuser
 from landlab.components import FastscapeEroder
 from landlab import imshow_grid
 from landlab.io.netcdf import write_netcdf
+from landlab.io.netcdf import read_netcdf
 from matplotlib import pyplot as plt
 from matplotlib import rcParams
 rcParams.update({'figure.autolayout': True})
@@ -56,8 +57,10 @@ dhdtA    = [] #Vector containing dhdt values for each node per timestep
 meandhdt = [] #contains mean elevation change per timestep
 meanE    = [] #contains the mean "erosion" rate out of Massbalance
 
-#-------------RUNTIME------------#
 
+#------MODELGRID, CONDITIONS-----#
+#NETCDF-INPUT Reader (comment if not used)
+#mg = read_netcdf('This could be your inputfile.nc')
 #INITIALIZE LANDLAB COMPONENTGRID
 mg = RasterModelGrid((nrows,ncols),dx)
 z  = mg.add_ones('node','topographic__elevation')
@@ -82,6 +85,8 @@ plt.savefig('Distribution of SP_Threshold',dpi=720)
 fr  = FlowRouter(mg)
 ld  = LinearDiffuser(mg,linear_diffusivity=ldi)
 fc  = FastscapeEroder(mg,K_sp = Ksp1,m_sp=msp, n_sp=nsp, threshold_sp=threshold_arr)
+
+#-------------RUNTIME------------#
 
 #Main Loop 1 (After first sucess is confirmed this is all moved in a class....)
 t0 = time.time()
