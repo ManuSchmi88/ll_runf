@@ -147,10 +147,11 @@ while elapsed_time < total_T1:
     elapsed_time += dt #update elapsed time
 tE = time.time()
 print()
-print('End of  Main Loop. So far it took {}s to get here. No worries homeboy...'.format(tE-t0))
+print('End of first loop. So far it took {}s to get here. No worries homeboy...'.format(tE-t0))
+print('starting second loop. Prepare for WARP 0.7')
 
 #-----------SECOND LOOP----------#
-while elapsed_time < total_T1:
+while elapsed_time < total_T2:
 
     #create copy of "old" topography
     z0 = mg.at_node['topographic__elevation'].copy()
@@ -197,7 +198,7 @@ while elapsed_time < total_T1:
     elapsed_time += dt #update elapsed time
 tE = time.time()
 print()
-print('End of  Main Loop. So far it took {}s to get here. No worries homeboy...'.format(tE-t0))
+print('End of last loop. But we are not at the end. The show must go on. '.format(tE-t0))
 
 ## OUTPUT OF EROSION RATES AND DIFFMAPS (BETA! NEEDS TO GO INTO SEPERATE CLASS
 ## TO KEEP RUNFILE NEAT AND SLEEK
