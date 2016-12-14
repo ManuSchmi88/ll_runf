@@ -76,6 +76,7 @@ for edge in (mg.nodes_at_top_edge,mg.nodes_at_bottom_edge):
 #Create Threshold_sp field
 threshold_arr  = mg.zeros('node',dtype=float)
 threshold_arr += 3e-5
+threshold_arr[np.where(mg.x_of_node >= 30000)] += 3e-5
 threshold_field = mg.add_field('node','threshold_sp',threshold_arr,noclobber = False)
 imshow_grid(mg,'threshold_sp')
 plt.title('Stream-Power Threshold')
