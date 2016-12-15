@@ -117,6 +117,10 @@ while elapsed_time < total_T1:
     erosionMatrix = uplift_per_step - dhdt
     meanE.append(np.mean(erosionMatrix))
 
+    #do some garbage collection
+    del z0
+    del dhdt
+
     #Run the output loop every oi-times
     if elapsed_time % oi  == 0:
 
@@ -174,8 +178,13 @@ while elapsed_time < total_T2:
     erosionMatrix = uplift_per_step - dhdt
     meanE.append(np.mean(erosionMatrix))
 
+    #do some garbage collection
+    del z0
+    del dhdt
+
     #Run the output loop every oi-times
     if elapsed_time % oi  == 0:
+
         print('Elapsed Time:' , elapsed_time,'writing output!')
         ##Create DEM
         plt.figure()
