@@ -17,14 +17,14 @@ import time
 
 #-----------DOMAIN---------------#
 
-ncols = 601 
-nrows = 601 
+ncols = 301
+nrows = 301
 dx    = 100
 
 #------------TIME----------------#
 
 #runtime
-total_T1 = 10e6  #yrs. 
+total_T1 = 10e6  #yrs.
 #timestep
 dt = 100        #yrs
 #number of timesteps and fillfactor for ffmpeg printout
@@ -95,35 +95,40 @@ while elapsed_time < total_T1:
 
     #create copy of "old" topography
     z0 = mg.at_node['topographic__elevation'].copy()
-    
+
     #Call the erosion routines.
     fr.route_flow()
     ld.run_one_step(dt=dt)
     fc.run_one_step(dt=dt)
     mg.at_node['topographic__elevation'][mg.core_nodes] += uplift_rate * dt #add uplift
-    
+
     #Calculate dhdt and E
     dh = (mg.at_node['topographic__elevation'] - z0)
     dhdt = dh/dt
-    dhdtA.append(dhdt)
-    meandhdt.append(np.mean(dhdt))
-    meanE.append(np.mean(uplift_per_step - dhdt))
+    erosionMatrix = uplift_per_step - dhdt
+    #dhdtA.append(dhdt)  #can't do this. WAY too much memory consumption.
+    meanE.append(np.mean(erosionMatrix))
+
+    #do some garbage collection
+    del z0
+    del dhdt
     
     #Run the output loop every oi-times
     if elapsed_time % oi  == 0:
+
         print('Elapsed Time:' , elapsed_time,'writing output!')
-        #Create DEM
+        ##Create DEM
         plt.figure()
         imshow_grid(mg,'topographic__elevation',grid_units=['m','m'],var_name = 'Elevation',cmap='terrain')
         plt.savefig('./DEM/DEM_'+str(int(elapsed_time/oi)).zfill(zp)+'.png')
         plt.close()
-        #Create Flow Accumulation Map
+        ##Create Flow Accumulation Map
         plt.figure()
         imshow_grid(mg,fr.drainage_area,grid_units=['m','m'],var_name =
         'Drainage Area',cmap='bone')
         plt.savefig('./ACC/ACC_'+str(int(elapsed_time/oi)).zfill(zp)+'.png')
         plt.close()
-        #Create Slope - Area Map
+        ##Create Slope - Area Map
         plt.figure()
         plt.loglog(mg.at_node['drainage_area'][np.where(mg.at_node['drainage_area'] > 0)],
            mg.at_node['topographic__steepest_slope'][np.where(mg.at_node['drainage_area'] > 0)],
@@ -132,9 +137,12 @@ while elapsed_time < total_T1:
         plt.ylabel('Slope')
         plt.savefig('./SA/SA_'+str(int(elapsed_time/oi)).zfill(zp)+'.png')
         plt.close()
-        #Create NetCDF Output
+        ##Create NetCDF Output
         write_netcdf('./NC/output{}'.format(elapsed_time)+'__'+str(int(elapsed_time/oi)).zfill(zp)+'.nc',
                 mg,format='NETCDF4')
+        ##Create erosion_diffmaps
+        imshow_grid(mg,erosionMatrix,grid_units=['m','m'],var_name='Erosion m/yr',cmap='jet')
+
     elapsed_time += dt #update elapsed time
 tE = time.time()
 print()
@@ -142,7 +150,6 @@ print('End of  Main Loop. So far it took {}s to get here. No worries homeboy...'
 
 ## OUTPUT OF EROSION RATES AND DIFFMAPS (BETA! NEEDS TO GO INTO SEPERATE CLASS
 ## TO KEEP RUNFILE NEAT AND SLEEK
-
 #E-t:
 plt.figure()
 plt.plot(timeVec,meanE)
@@ -150,14 +157,4 @@ plt.ylabel('Erosion rate [m/yr]')
 plt.xlabel('Runtime [yrs]')
 plt.savefig('E-t-timeseries.png')
 
-#diffmap:
-counter = 0
-for i in dhdtA:
-    if counter % oi == 0:
-        imshow_grid(mg,i)
-        plt.savefig('./DHDT/diffmap_{}'.format(counter))
-        plt.close()
-        print("Creating Diffmapfile {}.png".format(counter))
-    counter += 1
 print("FINALLY! TADA! IT IS DONE! LOOK AT ALL THE OUTPUT I MADE!!!!")
-
