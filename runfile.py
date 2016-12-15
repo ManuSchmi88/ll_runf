@@ -112,7 +112,7 @@ while elapsed_time < total_T1:
     #do some garbage collection
     del z0
     del dhdt
-    
+
     #Run the output loop every oi-times
     if elapsed_time % oi  == 0:
 
@@ -141,7 +141,10 @@ while elapsed_time < total_T1:
         write_netcdf('./NC/output{}'.format(elapsed_time)+'__'+str(int(elapsed_time/oi)).zfill(zp)+'.nc',
                 mg,format='NETCDF4')
         ##Create erosion_diffmaps
+        plt.figure()
         imshow_grid(mg,erosionMatrix,grid_units=['m','m'],var_name='Erosion m/yr',cmap='jet')
+        plt.savefig('./DHDT/eMap_'+str(int(elapsed_time/oi)).zfill(zp)+'.png')
+        plt.close()
 
     elapsed_time += dt #update elapsed time
 tE = time.time()
