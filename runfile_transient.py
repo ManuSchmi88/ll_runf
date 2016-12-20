@@ -24,7 +24,7 @@ dx    = 100
 #------------TIME----------------#
 
 #runtime T1
-total_T1 = 3e6  #yrs.
+total_T1 = 5e6  #yrs.
 #runtime T2
 total_T2 = 6e6
 #timestep
@@ -32,7 +32,7 @@ dt = 100        #yrs
 #number of timesteps and fillfactor for ffmpeg printout
 nt = total_T1/dt
 #time-vector, mostly for plotting purposes
-timeVec = np.arange(0,total_T1,dt)
+timeVec = np.arange(0,total_T2,dt)
 #Set the interval at which we create output. Warning. High output frequency
 #will slow down the script significantly
 oi = 5000
@@ -114,7 +114,7 @@ while elapsed_time < total_T1:
     #Calculate dhdt and E
     dh = (mg.at_node['topographic__elevation'] - z0)
     dhdt = dh/dt
-    erosionMatrix = uplift_per_step - dhdt
+    erosionMatrix = uplift_rate - dhdt
     meanE.append(np.mean(erosionMatrix))
 
     #do some garbage collection
@@ -175,7 +175,7 @@ while elapsed_time < total_T2:
     #Calculate dhdt and E
     dh = (mg.at_node['topographic__elevation'] - z0)
     dhdt = dh/dt
-    erosionMatrix = uplift_per_step - dhdt
+    erosionMatrix = uplift_rate - dhdt
     meanE.append(np.mean(erosionMatrix))
 
     #do some garbage collection
