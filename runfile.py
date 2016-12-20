@@ -17,8 +17,8 @@ import time
 
 #-----------DOMAIN---------------#
 
-ncols = 301
-nrows = 301
+ncols = 601
+nrows = 601
 dx    = 100
 
 #------------TIME----------------#
@@ -76,7 +76,7 @@ for edge in (mg.nodes_at_top_edge,mg.nodes_at_bottom_edge):
 #Create Threshold_sp field
 threshold_arr  = mg.zeros('node',dtype=float)
 threshold_arr += 3e-5
-threshold_arr[np.where(mg.x_of_node >= 30000)] += 3e-5
+#threshold_arr[np.where(mg.x_of_node >= 30000)] += 3e-5
 threshold_field = mg.add_field('node','threshold_sp',threshold_arr,noclobber = False)
 imshow_grid(mg,'threshold_sp')
 plt.title('Stream-Power Threshold')
@@ -105,7 +105,7 @@ while elapsed_time < total_T1:
     #Calculate dhdt and E
     dh = (mg.at_node['topographic__elevation'] - z0)
     dhdt = dh/dt
-    erosionMatrix = uplift_per_step - dhdt
+    erosionMatrix = uplift_rate - dhdt
     #dhdtA.append(dhdt)  #can't do this. WAY too much memory consumption.
     meanE.append(np.mean(erosionMatrix))
 
