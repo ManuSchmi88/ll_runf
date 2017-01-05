@@ -15,7 +15,7 @@
 #SBATCH -N 1
 
 ##Set the correct python PATH variables
-LANDLABWRKDIR=/esd/esd/data/mschmid/model_runs
+LANDLABWRKDIR=/esd/esd/data/mschmid/model_runs/runningSimus
 PYTHONBIN=/esd/esd/data/mschmid/anaconda3/bin
 
 ##Set up correct folder structure
