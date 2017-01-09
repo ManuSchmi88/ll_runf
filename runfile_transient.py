@@ -158,7 +158,7 @@ while elapsed_time < total_T1:
 tE = time.time()
 print()
 print('End of first loop. So far it took {}s to get here. No worries homeboy...'.format(tE-t0))
-print('starting second loop. Prepare for WARP 0.7')
+print('starting second loop. Prepare for WARP-SPEED SCOTTY! ENERGY!')
 
 #-----------SECOND LOOP----------#
 while elapsed_time < total_T2:
