@@ -46,8 +46,8 @@ uplift_per_step = uplift_rate * dt
 #-------------EROSION------------#
 
 Ksp1 = 1e-5
-msp  = 0.5
-nsp  = 1.0
+msp  = 0.6
+nsp  = 0.9
 ldib   = 1e-2
 #time
 elapsed_time = 0
@@ -67,6 +67,7 @@ dhdtA    = [] #Vector containing dhdt values for each node per timestep
 meandhdt = [] #contains mean elevation change per timestep
 meanE    = [] #contains the mean "erosion" rate out of Massbalance
 
+print("Finished variable initiation.")
 
 #------MODELGRID, CONDITIONS-----#
 #NETCDF-INPUT Reader (comment if not used)
@@ -82,6 +83,8 @@ for edge in (mg.nodes_at_left_edge,mg.nodes_at_right_edge):
     mg.status_at_node[edge] = CLOSED_BOUNDARY
 for edge in (mg.nodes_at_top_edge,mg.nodes_at_bottom_edge):
     mg.status_at_node[edge] = FIXED_VALUE_BOUNDARY
+
+print("Finished setting up Grid and establishing boundary conditions")
 
 #Set up vegetation__density field
 vegi_perc = mg.zeros('node',dtype=float)
@@ -110,14 +113,16 @@ Kfield += Kv
 lin_diff = mg.zeros('node', dtype = float)
 lin_diff = ldib*np.exp(-vegi_perc)
 
-#Create Threshold_sp field
-threshold_arr  = mg.zeros('node',dtype=float)
-threshold_arr += 3e-5
+print("Finished setting up the vegetation field and K and LD fields.")
+
+#Create Threshold_sp field CURRENTLY NOT WORKING!
+#threshold_arr  = mg.zeros('node',dtype=float)
+#threshold_arr += 3e-5
 #threshold_arr[np.where(mg.x_of_node >= 30000)] += 3e-5
-threshold_field = mg.add_field('node','threshold_sp',threshold_arr,noclobber = False)
-imshow_grid(mg,'threshold_sp')
-plt.title('Stream-Power Threshold')
-plt.savefig('Distribution of SP_Threshold',dpi=720)
+#threshold_field = mg.add_field('node','threshold_sp',threshold_arr,noclobber = False)
+#imshow_grid(mg,'threshold_sp')
+#plt.title('Stream-Power Threshold')
+#plt.savefig('Distribution of SP_Threshold',dpi=720)
 
 #Initialize the erosional components
 fr  = FlowRouter(mg)
@@ -128,6 +133,8 @@ sp  = StreamPowerEroder(mg,K_sp = Kfield,m_sp=msp, n_sp=nsp, threshold_sp=thresh
 
 #Main Loop 1 (After first sucess is confirmed this is all moved in a class....)
 t0 = time.time()
+print("finished initiation of eroding components. starting loop...")
+
 while elapsed_time < total_T1:
 
     #create copy of "old" topography

@@ -44,7 +44,7 @@ uplift_per_step = uplift_rate * dt
 
 #-------------EROSION------------#
 
-Ksp1 = 1e-5
+Ksp  = 1e-5
 msp  = 0.5
 nsp  = 1.0
 ldi   = 1e-2
