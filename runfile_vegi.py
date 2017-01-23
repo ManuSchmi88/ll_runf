@@ -52,6 +52,15 @@ ldib   = 1e-2
 #time
 elapsed_time = 0
 
+#---------Vegetation-------------#
+
+AqDens = 1000.0 #Density of Water [Kg/m^3]
+grav   = 9.81   #Gravitational Acceleration [N/Kg]
+n_soil = 0.025  #Mannings roughness for soil [-]
+n_VRef = 0.2    #Mannings Reference Roughness for Vegi [-]
+v_ref  = 1.0    #Reference Vegetation Density
+w      = 1.    #Some scaling factor for vegetation [-?]
+
 #---------VARIABLE INITIAION-----#
 
 dhdtA    = [] #Vector containing dhdt values for each node per timestep
@@ -76,11 +85,26 @@ for edge in (mg.nodes_at_top_edge,mg.nodes_at_bottom_edge):
 
 #Set up vegetation__density field
 vegi_perc = mg.zeros('node',dtype=float)
-vegi_trace_x = 30000
+vegi_trace_x = mg.x_of_node / 2
 more_vegi = np.where(mg.x_of_node >= vegi_trace_x)
 less_vegi = np.where(mg.x_of_node < vegi_trace_x)
-vegi_perc[less_vegi] += 0.0
-vegi_perc[more_vegi] += 1.0
+vegi_perc[less_vegi] += 0.2
+vegi_perc[more_vegi] += 0.3
+
+#Do the K-field vegetation-dependend calculations
+#Calculations after Istanbulluoglu
+nSoil_to_15 = np.power(n_soil, 1.5)
+Ford = AqDens * grav * nSoil_to_15
+n_v_frac = n_soil + (n_VRef*(vegi_perc/v_ref)) #self.vd = VARIABLE!
+n_v_frac_to_w = np.power(n_v_frac, w)
+Prefect = np.power(n_v_frac_to_w, 0.9)
+
+Kv = Ksp * Ford/Prefect
+
+#Set up K-field for StreamPowerEroder
+Kfield = mg.zeros('node',dtype = float)
+Kfield += Kv
+#Kfield[np.where(mg.x_of_node >= vegi_trace_x)] = 5e-3
 
 #Set up linear diffusivity field
 lin_diff = mg.zeros('node', dtype = float)
@@ -99,7 +123,7 @@ plt.savefig('Distribution of SP_Threshold',dpi=720)
 fr  = FlowRouter(mg)
 ld  = LinearDiffuser(mg,linear_diffusivity=lin_diff)
 #fc  = FastscapeEroder(mg,K_sp = Ksp1,m_sp=msp, n_sp=nsp, threshold_sp=threshold_arr)
-sp  = StreamPowerEroder(mg,K_sp = Ksp1,m_sp=msp, n_sp=nsp, threshold_sp=threshold_arr, vegetation__density=vegi_perc)
+sp  = StreamPowerEroder(mg,K_sp = Kfield,m_sp=msp, n_sp=nsp, threshold_sp=threshold_arr)
 #-------------RUNTIME------------#
 
 #Main Loop 1 (After first sucess is confirmed this is all moved in a class....)
