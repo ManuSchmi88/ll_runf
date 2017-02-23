@@ -117,7 +117,7 @@ lin_diff = ldib*np.exp(-vegi_perc)
 print("Finished setting up the vegetation field and K and LD fields.")
 
 #Create Threshold_sp field CURRENTLY NOT WORKING!
-#threshold_arr  = mg.zeros('node',dtype=float)
+threshold_arr  = mg.zeros('node',dtype=float)
 #threshold_arr += 3e-5
 #threshold_arr[np.where(mg.x_of_node >= 30000)] += 3e-5
 #threshold_field = mg.add_field('node','threshold_sp',threshold_arr,noclobber = False)
