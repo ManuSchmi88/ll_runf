@@ -45,10 +45,10 @@ uplift_per_step = uplift_rate * dt
 
 #-------------EROSION------------#
 
-Ksp1 = 1e-5
+Ksp = 1e-8
 msp  = 0.6
-nsp  = 0.9
-ldib   = 1e-2
+nsp  = 0.8
+ldib   = 1e-5
 #time
 elapsed_time = 0
 
@@ -142,7 +142,7 @@ while elapsed_time < total_T1:
     z0 = mg.at_node['topographic__elevation'].copy()
 
     #update lin_diff
-    lin_diff = linear_diffusivity_base*np.exp(-vegi_perc)
+    lin_diff = ldib*np.exp(-vegi_perc)
     ld = LinearDiffuser(mg,linear_diffusivity=lin_diff)
 
     #update K_sp
