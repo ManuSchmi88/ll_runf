@@ -88,11 +88,12 @@ print("Finished setting up Grid and establishing boundary conditions")
 
 #Set up vegetation__density field
 vegi_perc = mg.zeros('node',dtype=float)
-vegi_trace_x = mg.x_of_node / 2
-more_vegi = np.where(mg.x_of_node >= vegi_trace_x)
-less_vegi = np.where(mg.x_of_node < vegi_trace_x)
-vegi_perc[less_vegi] += 0.2
-vegi_perc[more_vegi] += 0.3
+#vegi_trace_x = mg.x_of_node / 2
+#more_vegi = np.where(mg.x_of_node >= vegi_trace_x)
+#less_vegi = np.where(mg.x_of_node < vegi_trace_x)
+#vegi_perc[less_vegi] += 0.2
+#vegi_perc[more_vegi] += 0.3
+vegi_test_timeseries = (np.sin(0.0015*timeVec)+1)/2
 
 #Do the K-field vegetation-dependend calculations
 #Calculations after Istanbulluoglu
@@ -140,6 +141,18 @@ while elapsed_time < total_T1:
     #create copy of "old" topography
     z0 = mg.at_node['topographic__elevation'].copy()
 
+    #update lin_diff
+    lin_diff = linear_diffusivity_base*np.exp(-vegi_perc)
+    ld = LinearDiffuser(mg,linear_diffusivity=lin_diff)
+
+    #update K_sp
+    n_v_frac = n_soil + (n_VRef*(vegi_perc/v_ref)) #self.vd = VARIABLE!
+    n_v_frac_to_w = np.power(n_v_frac, w)
+    Prefect = np.power(n_v_frac_to_w, 0.9)
+    Kv = Ksp * Ford/Prefect
+    Kfield = Kv
+    sp = StreamPowerEroder(mg, K_sp = Kfield, m_sp=msp, n_sp=nsp, sp_type = 'set_mn')
+
     #Call the erosion routines.
     fr.route_flow()
     ld.run_one_step(dt=dt)
@@ -150,7 +163,6 @@ while elapsed_time < total_T1:
     dh = (mg.at_node['topographic__elevation'] - z0)
     dhdt = dh/dt
     erosionMatrix = uplift_rate - dhdt
-    #dhdtA.append(dhdt)  #can't do this. WAY too much memory consumption.
     meanE.append(np.mean(erosionMatrix))
 
     #do some garbage collection
@@ -203,5 +215,16 @@ plt.plot(timeVec,meanE)
 plt.ylabel('Erosion rate [m/yr]')
 plt.xlabel('Runtime [yrs]')
 plt.savefig('E-t-timeseries.png')
+
+#Plot Vegi_erosin_rate
+fig, ax1 = plt.subplots(figsize = [12,8])
+ax2 = ax1.twinx()
+ax1.plot(timeVec, vegi_test_timeseries, 'g--',linewidth = 2.2)
+ax2.plot(timeVec, mean_E, 'r-',linewidth = 2.2)
+ax1.set_xlabel('years ')
+ax1.set_ylabel('Vegetation Density %', color='g')
+ax2.set_ylabel('Erosion Rate km/y', color='r')
+plt.savefig('./VegiEros_dualy.png',dpi = 720)
+plt.show()
 
 print("FINALLY! TADA! IT IS DONE! LOOK AT ALL THE OUTPUT I MADE!!!!")
