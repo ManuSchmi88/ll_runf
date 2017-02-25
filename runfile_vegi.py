@@ -18,14 +18,14 @@ import time
 
 #-----------DOMAIN---------------#
 
-ncols = 601
-nrows = 601
+ncols = 101
+nrows = 101
 dx    = 100
 
 #------------TIME----------------#
 
 #runtime
-total_T1 = 5e6  #yrs.
+total_T1 = 1e5  #yrs.
 #timestep
 dt = 100        #yrs
 #number of timesteps and fillfactor for ffmpeg printout
@@ -33,21 +33,21 @@ nt = total_T1/dt
 #time-vector, mostly for plotting purposes
 timeVec = np.arange(0,total_T1,dt)
 #Set the interval at which we create output. Warning. High output frequency
-#will slow down the script significantly
+#will slow down the script s ignificantly
 oi = 5000
 no = total_T1/oi
 zp = len(str(int(no)))
 
 #------------UPLIFT--------------#
 
-uplift_rate = 5e-4 #m/yr
+uplift_rate = 5e-5 #m/yr
 uplift_per_step = uplift_rate * dt
 
 #-------------EROSION------------#
 
-Ksp = 1e-8
+Ksp = 1e-7
 msp  = 0.6
-nsp  = 0.8
+nsp  = 1.0
 ldib   = 1e-5
 #time
 elapsed_time = 0
@@ -93,7 +93,7 @@ vegi_perc = mg.zeros('node',dtype=float)
 #less_vegi = np.where(mg.x_of_node < vegi_trace_x)
 #vegi_perc[less_vegi] += 0.2
 #vegi_perc[more_vegi] += 0.3
-vegi_test_timeseries = (np.sin(0.0015*timeVec)+1)/2
+vegi_test_timeseries = (np.sin(0.00015*timeVec)+1)/2
 
 #Do the K-field vegetation-dependend calculations
 #Calculations after Istanbulluoglu
@@ -107,7 +107,7 @@ Kv = Ksp * Ford/Prefect
 
 #Set up K-field for StreamPowerEroder
 Kfield = mg.zeros('node',dtype = float)
-Kfield += Kv
+Kfield = Kv
 #Kfield[np.where(mg.x_of_node >= vegi_trace_x)] = 5e-3
 
 #Set up linear diffusivity field
@@ -117,7 +117,7 @@ lin_diff = ldib*np.exp(-vegi_perc)
 print("Finished setting up the vegetation field and K and LD fields.")
 
 #Create Threshold_sp field CURRENTLY NOT WORKING!
-threshold_arr  = mg.zeros('node',dtype=float)
+threshold_arr  = 0
 #threshold_arr += 3e-5
 #threshold_arr[np.where(mg.x_of_node >= 30000)] += 3e-5
 #threshold_field = mg.add_field('node','threshold_sp',threshold_arr,noclobber = False)
@@ -141,18 +141,6 @@ while elapsed_time < total_T1:
     #create copy of "old" topography
     z0 = mg.at_node['topographic__elevation'].copy()
 
-    #update lin_diff
-    lin_diff = ldib*np.exp(-vegi_perc)
-    ld = LinearDiffuser(mg,linear_diffusivity=lin_diff)
-
-    #update K_sp
-    n_v_frac = n_soil + (n_VRef*(vegi_perc/v_ref)) #self.vd = VARIABLE!
-    n_v_frac_to_w = np.power(n_v_frac, w)
-    Prefect = np.power(n_v_frac_to_w, 0.9)
-    Kv = Ksp * Ford/Prefect
-    Kfield = Kv
-    sp = StreamPowerEroder(mg, K_sp = Kfield, m_sp=msp, n_sp=nsp, sp_type = 'set_mn')
-
     #Call the erosion routines.
     fr.route_flow()
     ld.run_one_step(dt=dt)
@@ -168,6 +156,24 @@ while elapsed_time < total_T1:
     #do some garbage collection
     del z0
     del dhdt
+
+    #update vegetation__density
+    vegi_perc = np.random.rand(z.size)/100
+    vegi_perc += vegi_test_timeseries[int(elapsed_time/dt)-1]
+
+    #update lin_diff
+    lin_diff = ldib*np.exp(-vegi_perc)
+    #reinitialize diffuser
+    ld = LinearDiffuser(mg,linear_diffusivity=lin_diff)
+
+    #update K_sp
+    n_v_frac = n_soil + (n_VRef*(vegi_perc/v_ref)) #self.vd = VARIABLE!
+    n_v_frac_to_w = np.power(n_v_frac, w)
+    Prefect = np.power(n_v_frac_to_w, 0.9)
+    Kv = Ksp * Ford/Prefect
+    Kfield = Kv
+    #reinitialize StreamPowerEroder
+    sp = StreamPowerEroder(mg, K_sp = Kfield, m_sp=msp, n_sp=nsp, sp_type = 'set_mn')
 
     #Run the output loop every oi-times
     if elapsed_time % oi  == 0:
@@ -220,7 +226,7 @@ plt.savefig('E-t-timeseries.png')
 fig, ax1 = plt.subplots(figsize = [12,8])
 ax2 = ax1.twinx()
 ax1.plot(timeVec, vegi_test_timeseries, 'g--',linewidth = 2.2)
-ax2.plot(timeVec, mean_E, 'r-',linewidth = 2.2)
+ax2.plot(timeVec, meanE, 'r-',linewidth = 2.2)
 ax1.set_xlabel('years ')
 ax1.set_ylabel('Vegetation Density %', color='g')
 ax2.set_ylabel('Erosion Rate km/y', color='r')
